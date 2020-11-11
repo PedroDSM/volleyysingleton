@@ -5,6 +5,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -13,37 +16,61 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URL;
 
-public class MainActivity extends Activity implements Response.Listener<JSONObject>, Response.ErrorListener {
+public class MainActivity extends AppCompatActivity {
 
-    private static final String URL = "https://samples.openweathermap.org/data/2.5/forecast?q=M%C3%BCnchen,DE&appid=439d4b804bc8187953eb36d2a8c26a02";
+    private TextView Resultados;
+    private RequestQueue requestQueue;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        RequestQueue request  = Volley.newRequestQueue(this);
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, URL, this, this);
-        request.add(jsonObjectRequest);
+        Resultados = findViewById(R.id.resultado);
+        Button BMostrar = findViewById(R.id.mostrar);
 
+        requestQueue = Volley.newRequestQueue(this);
+
+        BMostrar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                jsonmostrar();
+            }
+        });
     }
 
-    @Override
-    public void onResponse(JSONObject response) {
-        try {
-            Log.d("onResponse()", response.toString(0));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
 
-    @Override
-    public void onErrorResponse(VolleyError error) {
-        Log.e("onErrorResponse()",error.toString());
+    private void jsonmostrar() {
+        String url = "https://reqres.in/api/unknown";
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            JSONArray jsonArray = response.getJSONArray("data");
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                JSONObject data = jsonArray.getJSONObject(i);
+                                String name = data.getString("name");
+                                int year = data.getInt("year");
+                                Resultados.append(name + ", " + (year) + ", " + "\n\n");
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+            }
+        });
+        requestQueue.add(request);
     }
 }
