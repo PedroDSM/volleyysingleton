@@ -22,35 +22,32 @@ import org.json.JSONObject;
 
 import java.net.URL;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private TextView Resultados;
-    private RequestQueue requestQueue;
+    protected RequestQueue frequestQueue;
+    private VolleyS mvolley;
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        mvolley=VolleyS.getInstance(this.getApplicationContext());
+        frequestQueue = mvolley.getRequestQueue();
         Resultados = findViewById(R.id.resultado);
-        Button BMostrar = findViewById(R.id.mostrar);
-
-        requestQueue = Volley.newRequestQueue(this);
-
-        BMostrar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                jsonmostrar();
-            }
-        });
+        findViewById(R.id.mostrar).setOnClickListener(this);
     }
 
 
-    private void jsonmostrar() {
-        String url = "https://reqres.in/api/unknown";
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url,
-                new Response.Listener<JSONObject>() {
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.mostrar:
+                String url = "https://reqres.in/api/unknown";
+                JsonObjectRequest request = new JsonObjectRequest(url,null,new Response.Listener<JSONObject>(){
+
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
@@ -66,11 +63,12 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                error.printStackTrace();
-            }
-        });
-        requestQueue.add(request);
-    }
-}
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                    }
+                });
+                frequestQueue.add(request);
+                    }
+                }
+        }
